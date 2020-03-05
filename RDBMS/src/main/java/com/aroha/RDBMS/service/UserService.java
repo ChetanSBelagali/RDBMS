@@ -32,7 +32,6 @@ public class UserService {
 	@Autowired
 	TestRepository testRepo;
 
-
 	Statement stmt=null;
 	ResultSet rs=null;
 	Connection con = null;
@@ -45,18 +44,45 @@ public class UserService {
 		DataResponse dataResponse = new DataResponse();
 		boolean status=true;
 		JSONArray jsona = null;
+		//======================================================================//
+		if(test.getDbName().isEmpty() && test.getUsername().isEmpty() && test.getPassword().isEmpty() && test.getTableName().isEmpty()) {
+			status=false;
+			dataResponse.setStatus(status);
+			dataResponse.setMessage("Please Provide Required Request Body");
+			return dataResponse;
+		}
+		if(test.getDbName().isEmpty()) {
+			status=false;
+			dataResponse.setStatus(status);
+			dataResponse.setMessage("Sorry!......DB Name Cannot be Empty");
+			return dataResponse;
+		}
+		if(test.getUsername().isEmpty()) {
+			status=false;
+			dataResponse.setStatus(status);
+			dataResponse.setMessage("Sorry!......Username Cannot be Empty");
+			return dataResponse;
+		}
+		if(test.getTableName().isEmpty()) {
+			status=false;
+			dataResponse.setStatus(status);
+			dataResponse.setMessage("Sorry!......Please Provide Table Name");
+			return dataResponse;
+		}
+
+		//======================================================================//
 		try {
 			Connection con = null;
 			Statement stmt = null;
 			ResultSet rs = null;
-            //=================================================================//
+			//=================================================================//
 			con = getConnection(mainUrl, test.getUsername(), test.getPassword());
 			stmt = con.createStatement();
 			String res="select * from"+" "+test.getTableName();
 			rs = stmt.executeQuery(res);
 			jsona = getResult(rs);
 			//=================================================================//
-			if(jsona.isNull(1)) {
+			if(jsona.isNull(0)){
 				status=false;
 				dataResponse.setStatus(status);
 				dataResponse.setMessage("No Records Found in the Table");
@@ -68,7 +94,7 @@ public class UserService {
 			dataResponse.setStatus(status);
 			dataResponse.setMessage("Data Fetched Successfully");
 			dataResponse.setResult(getJsonArrayAsList(jsona));
-            //=================================================================//
+			//=================================================================//
 			JSONObject output1 = new JSONObject(output);
 			String path="D:/JSONDATA/";
 			String name="DB"+"-"+test.getDbName()+"_"+"TABLE"+"-"+test.getTableName();
@@ -107,9 +133,10 @@ public class UserService {
 		return json;
 	}
 
-
+	//==================================================================================================//
 	private List getJsonArrayAsList(JSONArray jsona) {
 		return jsona.toList();
 	}
+	//==================================================================================================//
 
 }
